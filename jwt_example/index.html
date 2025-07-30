@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JWT Middleware Example</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        h1,
+        h2 {
+            color: #333;
+        }
+
+        .login-section {
+            background: #e8f4fd;
+            border-left: 4px solid #007bff;
+        }
+
+        .test-section {
+            background: #f8f9fa;
+            border-left: 4px solid #28a745;
+        }
+
+        .error {
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+        }
+
+        .success {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+        }
+
+        input,
+        button,
+        select {
+            padding: 10px;
+            margin: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        button {
+            background: #007bff;
+            color: white;
+            cursor: pointer;
+            border: none;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        .admin-btn {
+            background: #dc3545;
+        }
+
+        .admin-btn:hover {
+            background: #c82333;
+        }
+
+        pre {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+
+        .token-display {
+            word-break: break-all;
+            background: #fff3cd;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+
+        .endpoint-group {
+            margin: 15px 0;
+            padding: 15px;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            background: #f8f9fa;
+        }
+
+        .user-info {
+            background: #d1ecf1;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🔐 JWT Middleware Example</h1>
+        <p>This demo showcases JWT authentication middleware for Crow C++ framework.</p>
+
+        <div class="user-info">
+            <strong>Test Users:</strong><br>
+            • Username: <code>admin</code>, Password: <code>adminpass123</code> (admin role)<br>
+            • Username: <code>user</code>, Password: <code>userpass123</code> (user role)
+        </div>
+    </div>
+
+    <div class="container login-section">
+        <h2>🔑 Authentication</h2>
+        <div>
+            <select id="userSelect">
+                <option value="admin:adminpass123">Admin User</option>
+                <option value="user:userpass123">Regular User</option>
+            </select>
+            <button onclick="login()">Login</button>
+            <button onclick="logout()">Logout</button>
+        </div>
+
+        <div id="authStatus"></div>
+        <div id="tokenDisplay" style="display:none;">
+            <h3>JWT Token:</h3>
+            <div class="token-display" id="tokenValue"></div>
+        </div>
+    </div>
+
+    <div class="container test-section">
+        <h2>🧪 API Testing</h2>
+
+        <div class="endpoint-group">
+            <h3>Public Endpoints (No Authentication)</h3>
+            <button onclick="testEndpoint('/api/public', 'GET')">Test Public API</button>
+        </div>
+
+        <div class="endpoint-group">
+            <h3>Protected Endpoints (JWT Required)</h3>
+            <button onclick="testEndpoint('/api/protected', 'GET')">Test Protected API</button>
+            <button onclick="testEndpoint('/api/profile', 'GET')">Test Profile API</button>
+        </div>
+
+        <div class="endpoint-group">
+            <h3>Admin Endpoints (Admin JWT Required)</h3>
+            <button onclick="testEndpoint('/api/admin', 'GET')" class="admin-btn">Test Admin API</button>
+            <button onclick="testEndpoint('/api/admin/users', 'GET')" class="admin-btn">Test Admin Users API</button>
+        </div>
+
+        <div id="testResults"></div>
+    </div>
+
+    <div class="container">
+        <h2>📋 Response Log</h2>
+        <div id="responseLog"></div>
+        <button onclick="clearLog()">Clear Log</button>
+    </div>
+
+    <script>
+        let currentToken = null;
+        let currentUser = null;
+
+        function updateAuthStatus() {
+            const authStatus = document.getElementById('authStatus');
+            const tokenDisplay = document.getElementById('tokenDisplay');
+
+            if (currentToken && currentUser) {
+                authStatus.innerHTML = `
+                    <div class="success">
+                        <strong>✅ Logged in as:</strong> ${currentUser.username} (${currentUser.role})<br>
+                        <strong>User ID:</strong> ${currentUser.id}
+                    </div>
+                `;
+                tokenDisplay.style.display = 'block';
+                document.getElementById('tokenValue').textContent = currentToken;
+            } else {
+                authStatus.innerHTML = '<div class="error"><strong>❌ Not authenticated</strong></div>';
+                tokenDisplay.style.display = 'none';
+            }
+        }
+
+        async function login() {
+            const userSelect = document.getElementById('userSelect');
+            const [username, password] = userSelect.value.split(':');
+
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+                logResponse('POST /api/login', response.status, data);
+
+                if (data.success) {
+                    currentToken = data.token;
+                    currentUser = data.user;
+                    updateAuthStatus();
+                } else {
+                    alert('Login failed: ' + data.message);
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                logResponse('POST /api/login', 'ERROR', { error: error.message });
+            }
+        }
+
+        function logout() {
+            currentToken = null;
+            currentUser = null;
+            updateAuthStatus();
+            logResponse('LOGOUT', 200, { message: 'Logged out successfully' });
+        }
+
+        async function testEndpoint(endpoint, method = 'GET') {
+            const headers = {
+                'Content-Type': 'application/json'
+            };
+
+            if (currentToken) {
+                headers['Authorization'] = `Bearer ${currentToken}`;
+            }
+
+            try {
+                const response = await fetch(endpoint, {
+                    method: method,
+                    headers: headers
+                });
+
+                const data = await response.json();
+                logResponse(`${method} ${endpoint}`, response.status, data);
+
+                // Update test results
+                const testResults = document.getElementById('testResults');
+                const statusClass = response.ok ? 'success' : 'error';
+                testResults.innerHTML = `
+                    <div class="${statusClass}">
+                        <strong>Last Test:</strong> ${method} ${endpoint}<br>
+                        <strong>Status:</strong> ${response.status}<br>
+                        <strong>Response:</strong> <pre>${JSON.stringify(data, null, 2)}</pre>
+                    </div>
+                `;
+
+            } catch (error) {
+                console.error('Test error:', error);
+                logResponse(`${method} ${endpoint}`, 'ERROR', { error: error.message });
+            }
+        }
+
+        function logResponse(endpoint, status, data) {
+            const log = document.getElementById('responseLog');
+            const timestamp = new Date().toLocaleTimeString();
+            const statusClass = (status >= 200 && status < 300) ? 'success' : 'error';
+
+            const logEntry = document.createElement('div');
+            logEntry.className = `container ${statusClass}`;
+            logEntry.innerHTML = `
+                <strong>[${timestamp}] ${endpoint}</strong> - Status: ${status}
+                <pre>${JSON.stringify(data, null, 2)}</pre>
+            `;
+
+            log.insertBefore(logEntry, log.firstChild);
+        }
+
+        function clearLog() {
+            document.getElementById('responseLog').innerHTML = '';
+            document.getElementById('testResults').innerHTML = '';
+        }
+
+        // Initialize
+        updateAuthStatus();
+
+        // Auto-test public endpoint on load
+        setTimeout(() => {
+            testEndpoint('/api/public', 'GET');
+        }, 1000);
+    </script>
+</body>
+
+</html>

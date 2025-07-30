@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>GPIO Control Panel</title>
+</head>
+<body>
+    <h1>GPIO Control Panel</h1>
+    
+    <h2>Hardware Controls</h2>
+    <button onclick="toggleGPIO(1)">GPIO 1: <span id="gpio1-status">OFF</span></button><br><br>
+    <button onclick="toggleGPIO(2)">GPIO 2: <span id="gpio2-status">OFF</span></button><br><br>
+    <button onclick="toggleGPIO(3)">GPIO 3: <span id="gpio3-status">OFF</span></button><br><br>
+    
+    <h2>Connection Status</h2>
+    <div id="status">Connecting to WebSocket...</div>
+    
+    <script>
+    var sock = new WebSocket("ws://{{servername}}:8080/ws");
+    
+    sock.onopen = function() {
+        console.log('WebSocket connected');
+        document.getElementById('status').innerHTML = 'Connected - Ready to receive updates';
+    }
+    
+    sock.onerror = function(e) {
+        console.log('WebSocket error', e);
+        document.getElementById('status').innerHTML = 'Connection Error';
+    }
+    
+    sock.onclose = function(e) {
+        console.log('WebSocket closed', e);
+        document.getElementById('status').innerHTML = 'Disconnected';
+    }
+    
+    sock.onmessage = function(e) {
+        try {
+            var data = JSON.parse(e.data);
+            if (data.type === 'gpio_update') {
+                // Update all button states when any client changes GPIO
+                document.getElementById('gpio1-status').innerHTML = data.gpio1 ? 'ON' : 'OFF';
+                document.getElementById('gpio2-status').innerHTML = data.gpio2 ? 'ON' : 'OFF';
+                document.getElementById('gpio3-status').innerHTML = data.gpio3 ? 'ON' : 'OFF';
+                
+                document.getElementById('status').innerHTML = 
+                    'GPIO States - 1:' + (data.gpio1 ? 'ON' : 'OFF') + 
+                    ', 2:' + (data.gpio2 ? 'ON' : 'OFF') + 
+                    ', 3:' + (data.gpio3 ? 'ON' : 'OFF');
+            }
+        } catch (e) {
+            console.log('Message received:', e.data);
+        }
+    }
+    
+    function toggleGPIO(gpioNum) {
+        fetch('/gpio' + gpioNum, {
+            method: 'POST'
+        })
+        .then(response => response.text())
+        .then(data => {
+            console.log('GPIO' + gpioNum + ' toggled to:', data);
+        })
+        .catch(error => {
+            console.log('Failed to toggle GPIO' + gpioNum, error);
+        });
+    }
+    </script>
+</body>
+</html>

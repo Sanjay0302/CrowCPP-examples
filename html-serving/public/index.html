@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML Server with HTTPS</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔒 Secure HTML Server</h1>
+            <p>Welcome to your HTTPS-enabled web server!</p>
+        </header>
+        
+        <main>
+            <section class="info-section">
+                <h2>Server Features</h2>
+                <ul>
+                    <li>✅ HTTPS encryption with SSL certificates</li>
+                    <li>✅ Automatic HTTP to HTTPS redirection</li>
+                    <li>✅ Static file serving from public directory</li>
+                    <li>✅ JSON API endpoints</li>
+                    <li>✅ Security headers and path traversal protection</li>
+                </ul>
+            </section>
+            
+            <section class="demo-section">
+                <h2>Test Links</h2>
+                <div class="button-group">
+                    <a href="/about.html" class="btn">About Page</a>
+                    <a href="/api/status" class="btn api-btn">API Status</a>
+                    <a href="http://localhost:8080" class="btn redirect-btn">Test HTTP Redirect</a>
+                </div>
+            </section>
+            
+            <section class="status-section">
+                <h2>Server Status</h2>
+                <div id="status-info">
+                    <button onclick="loadStatus()" class="btn">Check Server Status</button>
+                    <div id="status-result"></div>
+                </div>
+            </section>
+        </main>
+        
+        <footer>
+            <p>Built with Crow C++ Framework | Secure HTTPS Server</p>
+        </footer>
+    </div>
+    
+    <script src="app.js"></script>
+</body>
+</html>

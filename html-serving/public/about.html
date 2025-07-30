@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About - HTML Server with HTTPS</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📋 About This Server</h1>
+            <p>Learn about the HTML Server with HTTPS implementation</p>
+        </header>
+        
+        <main>
+            <section class="info-section">
+                <h2>Project Overview</h2>
+                <p>This is a secure HTML server built with the Crow C++ framework that demonstrates:</p>
+                <ul>
+                    <li>🔐 HTTPS encryption using SSL/TLS certificates</li>
+                    <li>🔄 Automatic HTTP to HTTPS redirection</li>
+                    <li>📁 Static file serving from a public directory</li>
+                    <li>🔌 RESTful API endpoints</li>
+                    <li>🛡️ Security features including path traversal protection</li>
+                    <li>⚡ Multi-threaded concurrent server architecture</li>
+                </ul>
+            </section>
+            
+            <section class="demo-section">
+                <h2>Technical Details</h2>
+                <div style="background: #f7fafc; padding: 20px; border-radius: 8px; margin-top: 15px;">
+                    <h3>Architecture</h3>
+                    <p><strong>Framework:</strong> Crow C++ Web Framework</p>
+                    <p><strong>SSL/TLS:</strong> OpenSSL integration</p>
+                    <p><strong>HTTP Port:</strong> 8080 (redirects to HTTPS)</p>
+                    <p><strong>HTTPS Port:</strong> 8443 (secure connections)</p>
+                    <p><strong>Threading:</strong> Multi-threaded for concurrent requests</p>
+                </div>
+                
+                <div style="background: #f7fafc; padding: 20px; border-radius: 8px; margin-top: 15px;">
+                    <h3>Security Features</h3>
+                    <p>• Path traversal protection prevents access to files outside public directory</p>
+                    <p>• HTTPS enforced for all sensitive operations</p>
+                    <p>• Proper MIME type detection for different file types</p>
+                    <p>• 404 error handling for missing files</p>
+                </div>
+            </section>
+            
+            <section class="status-section">
+                <h2>Navigation</h2>
+                <div class="button-group">
+                    <a href="/" class="btn">← Back to Home</a>
+                    <a href="/api/status" class="btn api-btn">Check Server Status</a>
+                </div>
+            </section>
+        </main>
+        
+        <footer>
+            <p>Built with Crow C++ Framework | Secure HTTPS Server</p>
+        </footer>
+    </div>
+    
+    <script src="app.js"></script>
+</body>
+</html>
