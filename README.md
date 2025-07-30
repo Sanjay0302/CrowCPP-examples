@@ -1,5 +1,6 @@
 # CrowCPP-examples
-This Repo has the CrowCPP real world scenario based examples with security implementation using openssl
+
+This Repo has the CrowCPP real world scenario based examples with security implementation using openssl, and tools used for testing and capturing packet to verify the security implemented.
 
 Crow (C++ Microframework) : https://github.com/CrowCpp/Crow/blob/master/LICENSE
 
